@@ -4,7 +4,8 @@ import os
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 from huggingface_hub import InferenceClient
-import Pinecone
+import pinecone
+
 
 # Load environment variables
 load_dotenv()
