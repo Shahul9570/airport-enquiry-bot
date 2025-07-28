@@ -20,7 +20,8 @@ pinecone.init(api_key=api_key)
 index = pinecone.Index(index_name)
 
 # Sentence embedding model
-embed_model = SentenceTransformer('all-MiniLM-L6-v2')
+embed_model = SentenceTransformer('paraphrase-MiniLM-L3-v2')
+
 
 
 # Step 1: Embed the user query
