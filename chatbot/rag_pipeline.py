@@ -1,45 +1,38 @@
-# chatbot/rag_pipeline.py
-
 import os
 from dotenv import load_dotenv
 import pinecone
 from sentence_transformers import SentenceTransformer
 from transformers import pipeline
 
-qa_pipeline = pipeline("text2text-generation", model="google/flan-t5-base", max_new_tokens=256)
-
-# Load Hugging Face text generation pipeline
+# ✅ Load lightweight Hugging Face model to save memory
+qa_pipeline = pipeline("text2text-generation", model="google/flan-t5-small", max_new_tokens=128)
 
 load_dotenv()
 
-# Initialize APIs
-
-
+# Initialize Pinecone
 from pinecone import Pinecone
 
-# Load keys
 api_key = os.getenv("PINECONE_API_KEY")
 index_name = os.getenv("PINECONE_INDEX")
 
-# Connect
 pc = Pinecone(api_key=api_key)
 index = pc.Index(index_name)
 
+# Embedding model
 embed_model = SentenceTransformer('all-MiniLM-L6-v2')
-
 
 # Step 1: Embed the user query
 def get_query_embedding(query):
     return embed_model.encode(query).tolist()
 
 # Step 2: Search Pinecone for relevant content
-def retrieve_documents(query, top_k=5):
+def retrieve_documents(query, top_k=2):  # 🔽 Reduced to 2 for lower RAM usage
     query_vector = get_query_embedding(query)
     results = index.query(vector=query_vector, top_k=top_k, include_metadata=True)
     docs = [match['metadata']['text'] for match in results['matches']]
     return docs
 
-# Step 3: Send context + query to OpenAI to generate an answer
+# Step 3: Send context + query to Hugging Face model to generate an answer
 def generate_answer(query):
     try:
         print("🔍 Query:", query)
@@ -63,7 +56,6 @@ Answer:"""
         output = qa_pipeline(prompt)[0]["generated_text"]
         print("✅ Response received")
 
-        # Extract only the final answer
         return output.split("Answer:")[-1].strip()
 
     except Exception as e:
@@ -73,8 +65,7 @@ Answer:"""
         return "An error occurred."
 
 
-
-# Test it directly
+# Run directly for testing
 if __name__ == "__main__":
     while True:
         user_query = input("\nAsk a question (type 'exit' to quit): ")
