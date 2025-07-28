@@ -4,14 +4,17 @@ from chatbot.rag_pipeline import generate_answer
 
 app = FastAPI()
 
-# ✅ Allow frontend (GitHub Pages) to call backend (Render)
+# Allow cross-origin for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Or replace "*" with specific frontend URL
-    allow_credentials=True,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/")
+def root():
+    return {"message": "Changi Airport Chatbot API is running!"}
 
 @app.get("/chat")
 def chat(query: str = Query(..., description="Your question")):
