@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 from huggingface_hub import InferenceClient
-from pinecone import Pinecone
+import Pinecone
 
 # Load environment variables
 load_dotenv()
@@ -15,8 +15,8 @@ client = InferenceClient("google/flan-t5-base")
 # Pinecone setup
 api_key = os.getenv("PINECONE_API_KEY")
 index_name = os.getenv("PINECONE_INDEX")
-pc = Pinecone(api_key=api_key)
-index = pc.Index(index_name)
+pinecone.init(api_key=api_key)
+index = pinecone.Index(index_name)
 
 # Sentence embedding model
 embed_model = SentenceTransformer('all-MiniLM-L6-v2')
