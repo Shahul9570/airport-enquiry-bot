@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Airport Enquiry Bot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background: #f4f4f4;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    #chat-box {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, button {
+      padding: 0.6rem;
+      font-size: 1rem;
+      width: 100%;
+      margin-top: 1rem;
+    }
+    #response {
+      margin-top: 1.5rem;
+      background: #eaf4ff;
+      padding: 1rem;
+      border-radius: 5px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-box">
+    <h1>Airport Enquiry Bot ✈️</h1>
+    <input type="text" id="question" placeholder="Ask a question about the airport..." />
+    <button onclick="askBot()">Ask</button>
+    <div id="response"></div>
+  </div>
+
+  <script>
+    async function askBot() {
+      const query = document.getElementById('question').value.trim();
+      const responseDiv = document.getElementById('response');
+      if (!query) {
+        responseDiv.innerText = "Please enter a question.";
+        return;
+      }
+
+      responseDiv.innerText = "⏳ Thinking...";
+
+      try {
+        const res = await fetch(`https://airport-enquiry-bot.onrender.com/chat?query=${encodeURIComponent(query)}`);
+        const data = await res.json();
+
+        if (data.answer) {
+          responseDiv.innerHTML = `<strong>Answer:</strong> ${data.answer}`;
+        } else {
+          responseDiv.innerText = "No answer found.";
+        }
+      } catch (error) {
+        responseDiv.innerText = "❌ Error connecting to the chatbot.";
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>
