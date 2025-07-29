@@ -1,13 +1,16 @@
+# app.py
+
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from chatbot.rag_pipeline import generate_answer
 
 app = FastAPI()
 
-# Allow cross-origin for frontend
+# Allow GitHub Pages origin only (not "*")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://shahul9570.github.io"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
