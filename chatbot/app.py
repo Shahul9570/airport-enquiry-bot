@@ -9,11 +9,12 @@ app = FastAPI()
 # Allow GitHub Pages origin only (not "*")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://shahul9570.github.io"],
+    allow_origins=["https://shahul9570.github.io"],  # ✅ NOT "*"
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.get("/")
 def root():
