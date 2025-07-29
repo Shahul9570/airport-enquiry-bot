@@ -1,42 +1,57 @@
+# chatbot/rag_pipeline.py
+
 import os
 from dotenv import load_dotenv
-from huggingface_hub import InferenceClient
 import pinecone
+from sentence_transformers import SentenceTransformer
+from transformers import pipeline
 
-# Load environment variables
+qa_pipeline = pipeline("text2text-generation", model="google/flan-t5-base", max_new_tokens=256)
+
+# Load Hugging Face text generation pipeline
+
 load_dotenv()
 
-# Pinecone setup
+# Initialize APIs
+
+
+from pinecone import Pinecone
+
+# Load keys
 api_key = os.getenv("PINECONE_API_KEY")
 index_name = os.getenv("PINECONE_INDEX")
-pinecone.init(api_key=api_key)
-index = pinecone.Index(index_name)
+
+# Connect
+pc = Pinecone(api_key=api_key)
+index = pc.Index(index_name)
+
+embed_model = SentenceTransformer('all-MiniLM-L6-v2')
+
 
 # Step 1: Embed the user query
 def get_query_embedding(query):
-    from sentence_transformers import SentenceTransformer
-    embed_model = SentenceTransformer('paraphrase-MiniLM-L3-v2')  # smaller model
     return embed_model.encode(query).tolist()
 
 # Step 2: Search Pinecone for relevant content
-def retrieve_documents(query, top_k=3):  # reduced from 5 to 3 to save memory
+def retrieve_documents(query, top_k=5):
     query_vector = get_query_embedding(query)
     results = index.query(vector=query_vector, top_k=top_k, include_metadata=True)
     docs = [match['metadata']['text'] for match in results['matches']]
     return docs
 
-# Step 3: Generate answer using hosted flan-t5-base model
+# Step 3: Send context + query to OpenAI to generate an answer
 def generate_answer(query):
     try:
-        print("🔍 Query:", query)
+        print("🔍 Received query:", query)
         documents = retrieve_documents(query)
-        print("📄 Retrieved:", documents)
+        print("📄 Retrieved documents:", documents)
 
         if not documents:
             return "No relevant information found."
 
         context = "\n".join(documents)
-        prompt = f"""Use the context below to answer the question. If the answer is not found, say "I don't know."
+        prompt = f"""
+Use the context below to answer the question. If the answer is not found, say "I don't know."
 
 Context:
 {context}
@@ -44,14 +59,25 @@ Context:
 Question: {query}
 Answer:"""
 
-        print("🤖 Sending prompt to Hugging Face Inference API...")
-        client = InferenceClient("google/flan-t5-base")  # load inside function
-        response = client.text_generation(prompt, max_new_tokens=150)
-        print("✅ Response received")
-        return response.strip()
+        print("🤖 Sending prompt to Hugging Face model...")
+        output = qa_pipeline(prompt)[0]["generated_text"]
+        print("✅ Output received:", output)
+
+        return output.split("Answer:")[-1].strip()
 
     except Exception as e:
         import traceback
-        print("❌ Full Error Trace:")
+        print("❌ Exception occurred:")
         traceback.print_exc()
-        return "An error occurred."
+        return "Error: " + str(e)
+
+
+
+# Test it directly
+if __name__ == "__main__":
+    while True:
+        user_query = input("\nAsk a question (type 'exit' to quit): ")
+        if user_query.lower() == 'exit':
+            break
+        answer = generate_answer(user_query)
+        print("\n🧠 Answer:", answer)
