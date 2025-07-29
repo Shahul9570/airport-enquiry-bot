@@ -20,13 +20,10 @@ app.add_middleware(
 def root():
     return {"message": "Changi Airport Chatbot API is running!"}
 
+from chatbot.rag_pipeline import generate_answer
+
 @app.get("/chat")
-def chat(query: str = Query(..., description="Your question")):
-    try:
-        answer = generate_answer(query)
-        return {"question": query, "answer": answer}
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return {"error": str(e), "message": "Chatbot failed to generate a response"}
+def chat(query: str = Query(...)):
+    return {"question": query, "answer": generate_answer(query)}
+
 
