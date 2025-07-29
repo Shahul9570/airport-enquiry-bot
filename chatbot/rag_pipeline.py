@@ -31,6 +31,7 @@ load_dotenv()
 api_key = os.getenv("PINECONE_API_KEY")
 index_name = os.getenv("PINECONE_INDEX")
 
+# Connect
 pinecone.init(api_key=api_key)
 index = pinecone.Index(index_name)
 
