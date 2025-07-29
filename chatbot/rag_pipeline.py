@@ -6,7 +6,8 @@ import pinecone
 from sentence_transformers import SentenceTransformer
 from transformers import pipeline
 
-qa_pipeline = pipeline("text2text-generation", model="google/flan-t5-base", max_new_tokens=256)
+qa_pipeline = pipeline("text2text-generation", model="google/flan-t5-small")
+
 
 # Load Hugging Face text generation pipeline
 
@@ -39,7 +40,7 @@ def retrieve_documents(query, top_k=5):
     docs = [match['metadata']['text'] for match in results['matches']]
     return docs
 
-# Step 3: Send context + query to OpenAI to generate an answer
+# Step 3: Send context + query to  generate an answer
 def generate_answer(query):
     try:
         print("🔍 Received query:", query)
