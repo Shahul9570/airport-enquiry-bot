@@ -1,7 +1,6 @@
 fastapi
 uvicorn
 python-dotenv
-openai==0.28.0
 pinecone-client==2.2.4
 sentence-transformers
 transformers
@@ -10,3 +9,8 @@ huggingface-hub
 requests
 beautifulsoup4
 trafilatura
+
+# Required for FastAPI to serve properly
+aiohttp
+jinja2
+scikit-learn
