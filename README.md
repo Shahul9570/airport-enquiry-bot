@@ -12,9 +12,15 @@ An AI-powered chatbot that answers user queries about Changi Airport using Retri
 
 ```
 airport-enquiry-bot/
-├── app.py                      # FastAPI app definition
+                      
 ├── chatbot/
-│   └── rag_pipeline.py        # Core RAG pipeline
+│   ├── app.py                 # FastAPI app wrapper (not root)
+│   ├── crawl_urls.py          # Web crawler for Changi Airport URLs
+│   ├── embed_and_upload.py    # Embed documents and upload to Pinecone
+│   ├── rag_pipeline.py        # Core RAG pipeline
+│   ├── scrape_changi.py       # HTML scraper for airport content
+│   ├── utils.py               # Helper functions
+│   └── vector_store.py        # Vector DB (Pinecone) handling
 ├── chatui.py           # Streamlit-based chatbot UI
 ├── requirements.txt           # Project dependencies
 ├── .env                       # Environment variables (not committed)
