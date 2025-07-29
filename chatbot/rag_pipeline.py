@@ -27,11 +27,6 @@ def generate_answer_from_huggingface(prompt):
 
 load_dotenv()
 
-# Initialize APIs
-
-
-import Pinecone
-
 # Load keys
 api_key = os.getenv("PINECONE_API_KEY")
 index_name = os.getenv("PINECONE_INDEX")
