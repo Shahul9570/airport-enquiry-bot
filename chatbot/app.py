@@ -22,11 +22,6 @@ def root():
 
 @app.get("/chat")
 def chat(query: str = Query(..., description="Your question")):
-    try:
-        answer = generate_answer(query)
-        return {"question": query, "answer": answer}
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return {"error": str(e), "message": "Chatbot failed to generate a response"}
+    return {"question": query, "answer": f"Dummy response for: {query}"}
+
 
