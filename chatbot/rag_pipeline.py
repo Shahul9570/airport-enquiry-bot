@@ -6,7 +6,21 @@ import pinecone
 from sentence_transformers import SentenceTransformer
 from transformers import pipeline
 
-qa_pipeline = pipeline("text2text-generation", model="google/flan-t5-small")
+import requests
+import os
+
+HF_API_TOKEN = os.getenv("HUGGINGFACE_TOKEN")  # set in Render env variables
+
+def generate_answer_from_huggingface(prompt):
+    response = requests.post(
+        "https://api-inference.huggingface.co/models/google/flan-t5-small",
+        headers={"Authorization": f"Bearer {HF_API_TOKEN}"},
+        json={"inputs": prompt},
+    )
+    result = response.json()
+    return result[0]["generated_text"]
+
+
 
 
 # Load Hugging Face text generation pipeline
@@ -43,9 +57,9 @@ def retrieve_documents(query, top_k=5):
 # Step 3: Send context + query to  generate an answer
 def generate_answer(query):
     try:
-        print("🔍 Received query:", query)
+        print("🔍 Query:", query)
         documents = retrieve_documents(query)
-        print("📄 Retrieved documents:", documents)
+        print("📄 Retrieved:", documents)
 
         if not documents:
             return "No relevant information found."
@@ -60,17 +74,14 @@ Context:
 Question: {query}
 Answer:"""
 
-        print("🤖 Sending prompt to Hugging Face model...")
+        qa_pipeline = get_qa_pipeline()
         output = qa_pipeline(prompt)[0]["generated_text"]
-        print("✅ Output received:", output)
-
         return output.split("Answer:")[-1].strip()
 
     except Exception as e:
         import traceback
-        print("❌ Exception occurred:")
         traceback.print_exc()
-        return "Error: " + str(e)
+        return f"Error: {e}"
 
 
 
