@@ -15,7 +15,7 @@ load_dotenv()
 # Initialize APIs
 
 
-from pinecone import Pinecone
+
 
 # Load keys
 api_key = os.getenv("PINECONE_API_KEY")
