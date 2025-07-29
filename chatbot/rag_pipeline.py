@@ -6,26 +6,16 @@ import pinecone
 from sentence_transformers import SentenceTransformer
 from transformers import pipeline
 
-import requests
-import os
-
-HF_API_TOKEN = os.getenv("HUGGINGFACE_TOKEN")  # set in Render env variables
-
-def generate_answer_from_huggingface(prompt):
-    response = requests.post(
-        "https://api-inference.huggingface.co/models/google/flan-t5-small",
-        headers={"Authorization": f"Bearer {HF_API_TOKEN}"},
-        json={"inputs": prompt},
-    )
-    result = response.json()
-    return result[0]["generated_text"]
-
-
-
+qa_pipeline = pipeline("text2text-generation", model="google/flan-t5-base", max_new_tokens=256)
 
 # Load Hugging Face text generation pipeline
 
 load_dotenv()
+
+# Initialize APIs
+
+
+from pinecone import Pinecone
 
 # Load keys
 api_key = os.getenv("PINECONE_API_KEY")
@@ -35,9 +25,6 @@ index_name = os.getenv("PINECONE_INDEX")
 pinecone.init(api_key=api_key)
 index = pinecone.Index(index_name)
 
-# Connect
-pc = Pinecone(api_key=api_key)
-index = pc.Index(index_name)
 
 embed_model = SentenceTransformer('all-MiniLM-L6-v2')
 
@@ -53,7 +40,7 @@ def retrieve_documents(query, top_k=5):
     docs = [match['metadata']['text'] for match in results['matches']]
     return docs
 
-# Step 3: Send context + query to  generate an answer
+# Step 3: Send context + query to OpenAI to generate an answer
 def generate_answer(query):
     try:
         print("🔍 Query:", query)
@@ -73,14 +60,18 @@ Context:
 Question: {query}
 Answer:"""
 
-        qa_pipeline = get_qa_pipeline()
+        print("🤖 Sending prompt to Hugging Face model...")
         output = qa_pipeline(prompt)[0]["generated_text"]
+        print("✅ Response received")
+
+        # Extract only the final answer
         return output.split("Answer:")[-1].strip()
 
     except Exception as e:
         import traceback
+        print("❌ Full Error Trace:")
         traceback.print_exc()
-        return f"Error: {e}"
+        return "An error occurred."
 
 
 
