@@ -9,6 +9,7 @@ huggingface-hub
 requests
 beautifulsoup4
 trafilatura
+streamlit
 
 # Required for FastAPI to serve properly
 aiohttp
